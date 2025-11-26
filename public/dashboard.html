@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DASHBOARD</title>
+    <link rel="stylesheet" href="./css/dashboard.css" />
+    <script src="./js/sessao.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+
+  <body>
+    <aside class="sidebar">
+      <div class="logo-section">
+        <img src="./assets/imgs/logo1.png" alt="Logo" />
+      </div>
+
+      <nav class="menu">
+        <a href="./resultado_quiz.html" class="menu-item">ESTILO</a>
+        <a href="./dashboard.html" class="menu-item active">DASHBOARD</a>
+        <a href="./gameMemory.html" class="menu-item">GAME</a>
+        <button onclick="limparSessao()" class="button">SAIR</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="title">
+        <h1 id="welcome">BEM-VINDA, <span id="userName">--</span>!</h1>
+      </header>
+
+      <section class="chart-card">
+        <div class="chart-legend">
+          <span class="legend-dot"></span>
+          <strong class="legend-text"
+            >TOTAL DE PONTOS NOS ÚLTIMOS 10 JOGOS</strong
+          >
+        </div>
+
+        <canvas id="barChart" class="chart"></canvas>
+      </section>
+
+      <section class="kpi-row">
+        <div class="kpi" id="kpi-maior">
+          <h3>MAIOR PONTUAÇÃO:</h3>
+          <div class="value" id="maiorValor"></div>
+          <div class="sub">PONTOS</div>
+        </div>
+
+        <div class="kpi" id="kpi-nivel">
+          <h3>NÍVEL:</h3>
+          <div class="value" id="nivelValor">--</div>
+          <div class="sub">&nbsp;</div>
+        </div>
+
+        <div class="kpi" id="kpi-total">
+          <h3>TOTAL DE JOGOS:</h3>
+          <div class="value" id="totalJogosValor">--</div>
+          <div class="sub">JOGOS</div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="right-panel">
+      <h3>NÍVEIS</h3>
+      <div class="level-card">
+        <small>Iniciante Elegante</small>
+        <div class="range">0 - 180</div>
+        <div>pontos</div>
+      </div>
+
+      <div class="level-card">
+        <small>Intermediário Estiloso</small>
+        <div class="range">181 - 300</div>
+        <div>pontos</div>
+      </div>
+
+      <div class="level-card">
+        <small>Mestre da Sofisticação</small>
+        <div class="range">+301</div>
+        <div>pontos</div>
+      </div>
+    </aside>
+  </body>
+</html>
+
+<script>
+  console.log("SessionStorage na quiz:", sessionStorage);
+  if (!sessionStorage.ID_USUARIO) {
+    window.location = "./login.html";
+  } else {
+    console.log("ID na sessão:", sessionStorage.ID_USUARIO);
+  }
+
+  var barChart;
+  var idUsuario = sessionStorage.getItem("ID_USUARIO");
+  var maiorPontuacao;
+  var nivel;
+  var totalJogos;
+  var pontos;
+
+  window.addEventListener("load", () => {
+    dashboard();
+    totalPontos();
+    maiorPontuacaoTotal();
+    nivelPontos();
+    totalJogos();
+  });
+
+  function dashboard() {
+    var userName = sessionStorage.getItem("NOME_USUARIO");
+    document.getElementById("userName").textContent = userName;
+  }
+
+  function totalPontos() {
+    fetch("/dashboard/total-pontos/" + idUsuario)
+      .then((response) => response.json())
+      .then((data) => {
+        pontos = data.reverse();
+        plotarGrafico();
+
+        console.log("Pontos: ", pontos);
+      })
+      .catch((error) => console.error("Erro ao buscar pontos:", error));
+  }
+
+  function maiorPontuacaoTotal() {
+    fetch("/dashboard/maior-pontuacao/" + idUsuario)
+      .then((response) => response.json())
+      .then((data) => {
+        maiorPontuacao = data;
+        console.log("Maior Pontuação: ", maiorPontuacao);
+        document.getElementById("maiorValor").textContent =
+          maiorPontuacao[0].maiorPontuacao;
+      })
+      .catch((error) =>
+        console.error("Erro ao buscar maior pontuação:", error)
+      );
+  }
+
+  function nivelPontos() {
+    fetch("/dashboard/nivel/" + idUsuario)
+      .then((response) => response.json())
+      .then((data) => {
+        nivel = data;
+        console.log("Nivel: ", nivel);
+        document.getElementById("nivelValor").textContent = nivel[0].nivel;
+      })
+      .catch((error) => console.error("Erro ao buscar nivel:", error));
+  }
+
+  function totalJogos() {
+    fetch("/dashboard/total-jogos/" + idUsuario)
+      .then((response) => response.json())
+      .then((data) => {
+        totalJogos = data;
+        console.log("Total de Jogos: ", totalJogos);
+        document.getElementById("totalJogosValor").textContent =
+          totalJogos[0].totalJogos;
+      })
+      .catch((error) => console.error("Erro ao buscar total de jogos:", error));
+  }
+
+  function plotarGrafico() {
+    const ctx = document.getElementById("barChart");
+
+    if (barChart) {
+      barChart.destroy();
+    }
+
+    let labels = [];
+    let dados = [];
+
+    for (i = 0; i < pontos.length; i++) {
+      labels.push("Jogo " + (i + 1));
+      dados.push(pontos[i].pontos);
+    }
+
+    barChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Ultimos 10 jogos",
+            data: dados,
+            borderWidth: 1,
+            borderColor: "#7A2F00",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 10,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  dashboard();
+
+  function limparSessao() {
+    window.location = "./index.html";
+  }
+</script>

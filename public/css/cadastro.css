@@ -1,0 +1,168 @@
+@import url("https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&display=swap");
+
+:root {
+  --bg: #e3caab;
+  --card: #e3caab;
+  --brown: #6e3f27;
+  --input: #f9f7f0;
+  --btn: #ad8330;
+  --btn-text: #f9f7f0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  font-family: "PT Serif", serif;
+  color: var(--brown);
+}
+
+main.container {
+  max-width: 1360px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 680px 1fr;
+  align-items: center;
+  column-gap: 120px;
+  padding: 13px 40px;
+  position: relative;
+}
+
+.cadastro-container {
+  grid-column: 1;
+  width: 480px;
+  min-height: 280px;
+  background: var(--card);
+  border: 2px solid var(--brown);
+  border-radius: 18px;
+  padding: 15px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.cadastro-container .inputs-container,
+.cadastro-container h2,
+.cadastro-container p {
+  max-width: 600px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cadastro-container h1 {
+  text-align: center;
+  font-weight: 700;
+  font-size: 32px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--brown);
+  margin-bottom: 8px;
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.inputs-container label {
+  font-size: 1rem;
+}
+.inputs-container input {
+  width: 100%;
+  border: 2px solid var(--brown);
+  background: var(--input);
+  border-radius: 999px;
+  padding: 12px 16px;
+  font-size: 1.05rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 8px;
+}
+
+.inputs-container input:focus {
+  border-color: var(--brown);
+  box-shadow: 0 0 0 3px rgba(110, 63, 39, 0.22);
+}
+span {
+  font-size: 0.85rem;
+  color: #d9534f;
+  margin-left: 6px;
+}
+
+.cadastro-container button {
+  width: auto;
+  padding: 10px 26px;
+  align-self: center;
+  background: var(--btn);
+  border: none;
+  color: var(--btn-text);
+  font-family: "PT Serif", serif;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #845f28;
+  transition: 0.2s;
+  margin-top: 22px;
+}
+
+.cadastro-container button:hover {
+  filter: brightness(1.06);
+}
+.cadastro-container button:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 #845f28;
+}
+
+.cadastro-container p {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 1rem;
+}
+.cadastro-container p a {
+  color: var(--brown);
+  font-weight: 700;
+}
+
+.logo_image {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: center;
+  text-align: center;
+  margin-right: 24px;
+}
+.logo_image img {
+  width: min(600px, 96%);
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.banner-container {
+  position: fixed;
+  top: 28px;
+  right: 28px;
+  z-index: 10;
+}
+.link_voltar {
+  display: inline-block;
+  background: var(--btn);
+  color: var(--btn-text);
+  padding: 10px 26px;
+  border-radius: 999px;
+  font-size: 1rem;
+  text-decoration: none;
+  box-shadow: 0 6px 0 #845f28;
+  transition: 0.2s;
+}

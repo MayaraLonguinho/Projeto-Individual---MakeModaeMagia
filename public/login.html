@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tela de Login - MMM</title>
+    <link rel="stylesheet" href="./css/login.css" />
+    <script src="./js/sessao.js"></script>
+    <script src="./js/alerta.js"></script>
+  </head>
+
+  <body>
+    <main class="container">
+      <div class="banner-container">
+        <a href="./index.html" class="link_voltar">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Voltar
+        </a>
+      </div>
+
+      <div class="login-container">
+        <h1>LOGIN</h1>
+
+        <div class="inputs-container">
+          <label>
+            <br />
+
+            <div>
+              <input type="email" placeholder="Email" id="input_email" />
+              <span id="email_span"></span>
+            </div>
+          </label>
+
+          <div class="dupla-input">
+            <label>
+              <br />
+
+              <div>
+                <input type="password" placeholder="Senha" id="input_senha" />
+                <span id="senha_span"></span>
+              </div>
+            </label>
+            <br />
+          </div>
+        </div>
+
+        <button onclick="entrar()">ENTRAR</button>
+
+        <p>Ainda não tem cadastro? <a href="./cadastro.html">Cadastre-se</a></p>
+      </div>
+
+      <div class="logo_image">
+        <img src="./assets/imgs/logo1.png" />
+      </div>
+    </main>
+  </body>
+</html>
+<script>
+  function entrar() {
+    var emailVar = input_email.value;
+    var senhaVar = input_senha.value;
+
+    if (emailVar == "" || senhaVar == "") {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML =
+        "(Mensagem de erro para todos os campos em branco)";
+      return false;
+    }
+
+    console.log("FORM LOGIN: ", emailVar);
+    console.log("FORM SENHA: ", senhaVar);
+
+    fetch("/usuarios/autenticar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        emailServer: emailVar,
+        senhaServer: senhaVar,
+      }),
+    })
+      .then(function (resposta) {
+        console.log("ESTOU NO THEN DO entrar()!");
+
+        if (resposta.ok) {
+          console.log(resposta);
+
+          resposta.json().then((json) => {
+            console.log(json);
+            console.log(JSON.stringify(json));
+            const usuario = json[0];
+
+            sessionStorage.setItem("EMAIL_USUARIO", usuario.email);
+            sessionStorage.setItem("NOME_USUARIO", usuario.nome);
+            sessionStorage.setItem("ID_USUARIO", usuario.id);
+
+            console.log("Usuario ID: ", sessionStorage.getItem("ID_USUARIO"));
+            console.log(
+              "Usuario Nome: ",
+              sessionStorage.getItem("NOME_USUARIO")
+            );
+            console.log(
+              "Usuario Email: ",
+              sessionStorage.getItem("EMAIL_USUARIO")
+            );
+            buscarResultado();
+          });
+        } else {
+          console.log("Houve um erro ao tentar realizar o login!");
+
+          resposta.text().then((texto) => {
+            console.error(texto);
+          });
+        }
+      })
+      .catch(function (erro) {
+        console.log(erro);
+      });
+
+    return false;
+  }
+
+  function buscarResultado() {
+    var idusuario = sessionStorage.ID_USUARIO;
+
+    fetch("/quiz/buscar-resultado/" + idusuario, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then(function (resposta) {
+        console.log("ESTOU NO THEN DO buscarResultado()!");
+        console.log(resposta);
+        if (resposta.status === 204) {
+          console.log("Nenhum resultado encontrado");
+          window.location.href = "./quiz.html";
+        } else if (resposta.status === 200) {
+          resposta.json().then((json) => {
+            window.location.href = "./resultado_quiz.html";
+          });
+        } else {
+          console.log("Houve um erro ao tentar buscar resultado!");
+        }
+      })
+      .catch(function (erro) {
+        console.log(erro);
+      });
+  }
+</script>

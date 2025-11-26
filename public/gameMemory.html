@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JOGO DA MEMÓRIA</title>
+    <link rel="stylesheet" href="./css/gameMemory.css" />
+    <script src="./js/sessao.js"></script>
+  </head>
+
+  <body>
+    <aside class="sidebar">
+      <div class="logo-section">
+        <img src="./assets/imgs/logo1.png" alt="Logo" />
+      </div>
+
+      <nav class="menu">
+        <a href="./resultado_quiz.html" class="menu-item">ESTILO</a>
+        <a href="./dashboard.html" class="menu-item">DASHBOARD</a>
+        <a href="./gameMemory.html" class="menu-item active">GAME</a>
+        <button onclick="limparSessao()" class="button">SAIR</button>
+      </nav>
+    </aside>
+
+    <main class="game-container">
+      <h1 class="game-title">JOGO DA MEMÓRIA</h1>
+
+      <hr />
+
+      <div class="game-board" id="gameBoard"></div>
+
+      <div class="game-fim" id="gamefim">
+        <p class="game-title">FIM DE JOGO!</p>
+        <button class="button_final" onclick="initGame()">
+          JOGAR NOVAMENTE
+        </button>
+      </div>
+
+      <div class="score-section">
+        <p class="score-text">
+          PONTUAÇÃO ATUAL: <span id="score">0</span> pontos
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
+<script>
+  if (!sessionStorage.ID_USUARIO) {
+    window.location = "./login.html";
+  } else {
+    console.log("ID na sessão:", sessionStorage.ID_USUARIO);
+  }
+
+  const imagensBase = [
+    "./assets/imgs/casualele.png",
+    "./assets/imgs/classicosof.png",
+    "./assets/imgs/criativaele.png",
+    "./assets/imgs/modernaele.png",
+    "./assets/imgs/romanticaele.png",
+    "./assets/imgs/sensual.png",
+  ];
+
+  let imagensCartas = [];
+  let cartasViradas = [];
+  let paresEncontrados = 0;
+  let pontuacao = 0;
+  let podeVirarCarta = true;
+
+  const tabuleiro = document.getElementById("gameBoard");
+  const telaFim = document.getElementById("gamefim");
+  const campoPontuacao = document.getElementById("score");
+
+  function iniciarJogo() {
+    telaFim.style.display = "none";
+    tabuleiro.style.display = "grid";
+
+    imagensCartas = imagensBase.concat(imagensBase);
+
+    embaralharImagens(imagensCartas);
+
+    tabuleiro.innerHTML = "";
+
+    cartasViradas = [];
+    paresEncontrados = 0;
+    pontuacao = 0;
+    podeVirarCarta = true;
+    atualizarPontuacao();
+
+    for (let i = 0; i < imagensCartas.length; i++) {
+      const novaCarta = criarCarta(imagensCartas[i], i);
+      tabuleiro.appendChild(novaCarta);
+    }
+  }
+
+  function criarCarta(caminhoImagem, indice) {
+    const carta = document.createElement("div");
+    carta.className = "card";
+
+    carta.imagem = caminhoImagem;
+
+    const ladoVerso = document.createElement("div"); // fundo da carta
+
+    const ladoFrente = document.createElement("div"); // frente da carta
+    ladoFrente.className = "card-front";
+    ladoFrente.innerHTML = `<img src="${caminhoImagem}" alt="carta ${indice}">`;
+
+    carta.appendChild(ladoVerso);
+    carta.appendChild(ladoFrente);
+
+    carta.addEventListener("click", function () {
+      virarCarta(carta);
+    });
+
+    return carta;
+  }
+
+  function virarCarta(carta) {
+    if (!podeVirarCarta) return;
+    if (carta.classList.contains("flipped")) return;
+    if (carta.classList.contains("matched")) return;
+
+    carta.classList.add("flipped");
+
+    cartasViradas.push(carta);
+
+    if (cartasViradas.length === 2) {
+      podeVirarCarta = false;
+      verificarPar();
+    }
+  }
+
+  function verificarPar() {
+    const primeiraCarta = cartasViradas[0];
+    const segundaCarta = cartasViradas[1];
+
+    if (primeiraCarta.imagem === segundaCarta.imagem) {
+      primeiraCarta.classList.add("matched");
+      segundaCarta.classList.add("matched");
+
+      paresEncontrados++;
+      pontuacao += 100;
+      atualizarPontuacao();
+
+      cartasViradas = [];
+      podeVirarCarta = true;
+
+      if (paresEncontrados === imagensCartas.length / 2) {
+        setTimeout(function () {
+          salvarPontuacao();
+
+          tabuleiro.style.display = "none";
+          telaFim.style.display = "flex";
+        }, 500);
+      }
+    } else {
+      pontuacao -= 50;
+      if (pontuacao < 0) {
+        pontuacao = 0;
+      }
+      atualizarPontuacao();
+
+      setTimeout(function () {
+        primeiraCarta.classList.remove("flipped");
+        segundaCarta.classList.remove("flipped");
+        cartasViradas = [];
+        podeVirarCarta = true;
+      }, 1000);
+    }
+  }
+
+  function atualizarPontuacao() {
+    campoPontuacao.textContent = pontuacao;
+  }
+
+  function embaralharImagens(lista) {
+    lista.sort(function () {
+      return Math.random() - 0.5;
+    });
+  }
+
+  function salvarPontuacao() {
+    const idUsuario = sessionStorage.ID_USUARIO;
+    const pontosTotais = pontuacao;
+
+    console.log("Pontuação salva na sessão:", pontosTotais);
+    console.log("ID salvo na sessão:", idUsuario);
+
+    fetch("/game/cadastrar-pontuacao", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        idUsuario: idUsuario,
+        pontuacao: pontosTotais,
+      }),
+    });
+  }
+
+  window.onload = iniciarJogo;
+
+  function initGame() {
+    iniciarJogo();
+  }
+
+  function limparSessao() {
+    window.location = "./index.html";
+  }
+</script>

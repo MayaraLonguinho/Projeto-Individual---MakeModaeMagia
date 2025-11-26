@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUIZ</title>
+    <link rel="stylesheet" href="./css/quiz.css" />
+  </head>
+
+  <body>
+    <div class="page-container">
+      <header class="header">
+        <div class="logo-section">
+          <img src="./assets/imgs/logo1.png" />
+        </div>
+        <button class="btn-voltar" onclick="window.location.href='index.html'">
+          VOLTAR
+        </button>
+      </header>
+
+      <div class="quiz-container">
+        <div id="questionArea">
+          <div class="progress-indicator" id="progressIndicator">
+            PERGUNTA 1 DE 8
+          </div>
+          <h1 class="question-title" id="questionTitle"></h1>
+          <ul class="options-list" id="optionsList"></ul>
+
+          <div class="buttons">
+            <button
+              class="btn"
+              id="btnPrev"
+              onclick="perguntaAnterior()"
+              style="display: none"
+            >
+              Voltar
+            </button>
+            <button class="btn" id="btnNext" onclick="proximaPergunta()">
+              Próxima
+            </button>
+          </div>
+        </div>
+
+        <div id="resultArea" class="result-container">
+          <div class="content-wrapper">
+            <h1 class="title">
+              Seu Estilo é:
+              <span class="highlight" id="nomeEstilo"> </span>
+            </h1>
+
+            <p class="description" id="descricaoEstilo"></p>
+
+            <div class="section">
+              <h2 class="section-title">Paleta:</h2>
+              <p class="section-text" id="paletaEstilo"></p>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Modelagens-chave:</h2>
+              <p class="section-text" id="modelagensEstilo"></p>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Como elevar à elegância:</h2>
+              <p class="section-text" id="elevacaoEstilo"></p>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Make:</h2>
+              <p class="section-text" id="maquiagemEstilo"></p>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Looks exemplo:</h2>
+              <p class="section-text" id="exemploEstilo"></p>
+            </div>
+
+            <p class="footer-text" id="motivacaoEstilo"></p>
+          </div>
+
+          <div class="result-image">
+            <img src="" id="imageResultado" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      console.log("SessionStorage na quiz:", sessionStorage);
+
+      if (!sessionStorage.ID_USUARIO) {
+        window.location = "./login.html";
+      } else {
+        console.log("ID na sessão:", sessionStorage.ID_USUARIO);
+      }
+
+      var tiposDeEstilo = [
+        { "classico sofisticado": 1 },
+        { romântica: 2 },
+        { sensual: 3 },
+        { moderna: 4 },
+        { casual: 5 },
+        { criativa: 6 },
+      ];
+
+      var perguntasQuiz = [
+        {
+          pergunta:
+            "Quando você monta um look, o que é mais importante para você?",
+          opcoes: [
+            { valor: 1, texto: "Harmonia, elegância e sobriedade" },
+            { valor: 2, texto: "Delicadeza, romantismo e feminilidade" },
+            { valor: 3, texto: "Valorizar o corpo e passar confiança" },
+            { valor: 4, texto: "Modernidade e tendência" },
+            { valor: 5, texto: "Conforto e praticidade" },
+            { valor: 6, texto: "Criatividade, originalidade e personalidade" },
+          ],
+        },
+        {
+          pergunta:
+            "Escolha a palavra que melhor descreve como você quer ser percebida pelo seu estilo:",
+          opcoes: [
+            { valor: 1, texto: "Clássica" },
+            { valor: 2, texto: "Romântica" },
+            { valor: 3, texto: "Sexy" },
+            { valor: 4, texto: "Moderna" },
+            { valor: 5, texto: "Natural" },
+            { valor: 6, texto: "Criativa" },
+          ],
+        },
+        {
+          pergunta:
+            "Se você tivesse que escolher apenas uma peça-chave que representa seu estilo, qual seria?",
+          opcoes: [
+            { valor: 1, texto: "Camisa branca bem estruturada" },
+            { valor: 2, texto: "Vestido floral leve" },
+            { valor: 3, texto: "Body ajustado ou vestido justo" },
+            { valor: 4, texto: "Blazer oversized ou alfaiataria moderna" },
+            { valor: 5, texto: "Tênis branco versátil" },
+            {
+              valor: 6,
+              texto: "Jaqueta statement (couro, franjas, patchwork etc.)",
+            },
+          ],
+        },
+        {
+          pergunta:
+            "Entre acessórios e maquiagem, qual combinação mais representa você?",
+          opcoes: [
+            { valor: 1, texto: "Acessórios discretos + make leve e natural" },
+            { valor: 2, texto: "Acessórios delicados + blush suave" },
+            { valor: 3, texto: "Acessório marcante + make com destaque" },
+            { valor: 4, texto: "Acessórios geométricos + maquiagem moderna" },
+            { valor: 5, texto: "Acessórios simples + maquiagem prática" },
+            {
+              valor: 6,
+              texto: "Acessórios únicos + make artística ou diferente",
+            },
+          ],
+        },
+        {
+          pergunta:
+            "Como você prefere se vestir em eventos sociais ou ocasiões especiais?",
+          opcoes: [
+            { valor: 1, texto: "Clássico e elegante" },
+            { valor: 2, texto: "Romântico e leve" },
+            { valor: 3, texto: "Sensual com sutileza" },
+            { valor: 4, texto: "Fashion e atual" },
+            { valor: 5, texto: "Descontraído, mas arrumado" },
+            { valor: 6, texto: "Único e marcante" },
+          ],
+        },
+        {
+          pergunta:
+            "Escolha a paleta que mais representa o que você gosta de vestir:",
+          opcoes: [
+            { valor: 1, texto: "Neutros (preto, branco, nude)" },
+            { valor: 2, texto: "Tons suaves (rosa, lilás, off-white)" },
+            { valor: 3, texto: "Vermelho, vinho, dourado" },
+            { valor: 4, texto: "Preto com cores tendência" },
+            { valor: 5, texto: "Tons terrosos ou jeans" },
+            { valor: 6, texto: "Colorido ou mix de estampas" },
+          ],
+        },
+      ];
+
+      var indicePerguntaAtual = 0;
+
+      var respostasUsuario = [];
+
+      function iniciarQuiz() {
+        indicePerguntaAtual = 0;
+        respostasUsuario = [];
+        exibirPergunta();
+      }
+
+      function exibirPergunta() {
+        var perguntaAtual = perguntasQuiz[indicePerguntaAtual];
+        var totalPerguntas = perguntasQuiz.length;
+
+        var indicador = document.getElementById("progressIndicator");
+        indicador.textContent =
+          "PERGUNTA " + (indicePerguntaAtual + 1) + " DE " + totalPerguntas;
+
+        var titulo = document.getElementById("questionTitle");
+        titulo.textContent = perguntaAtual.pergunta;
+
+        var listaOpcoes = document.getElementById("optionsList");
+        listaOpcoes.innerHTML = "";
+        listaOpcoes.className = "options-list fade-in";
+
+        for (var i = 0; i < perguntaAtual.opcoes.length; i++) {
+          var opcao = perguntaAtual.opcoes[i];
+
+          var li = document.createElement("li");
+          li.className = "option";
+
+          var input = document.createElement("input");
+          input.type = "radio";
+          input.id = "opcao" + i;
+          input.name = "pergunta" + indicePerguntaAtual;
+          input.value = opcao.valor;
+
+          if (respostasUsuario[indicePerguntaAtual] === opcao.valor) {
+            input.checked = true;
+          }
+
+          var label = document.createElement("label");
+          label.htmlFor = "opcao" + i;
+          label.textContent = opcao.texto;
+
+          li.appendChild(input);
+          li.appendChild(label);
+          listaOpcoes.appendChild(li);
+        }
+
+        var btnAnterior = document.getElementById("btnPrev");
+        var btnProximo = document.getElementById("btnNext");
+
+        if (indicePerguntaAtual > 0) {
+          btnAnterior.style.display = "block";
+        } else {
+          btnAnterior.style.display = "none";
+        }
+
+        if (indicePerguntaAtual === totalPerguntas - 1) {
+          btnProximo.textContent = "Finalizar";
+        } else {
+          btnProximo.textContent = "Próxima";
+        }
+      }
+
+      function proximaPergunta() {
+        var nomeDoGrupo = "pergunta" + indicePerguntaAtual;
+        var selecionada = document.querySelector(
+          'input[name="' + nomeDoGrupo + '"]:checked'
+        );
+
+        if (!selecionada) {
+          alert("Por favor, selecione uma opção antes de continuar.");
+          return;
+        }
+
+        var valorResposta = parseInt(selecionada.value, 10);
+        respostasUsuario[indicePerguntaAtual] = valorResposta;
+
+        if (indicePerguntaAtual === perguntasQuiz.length - 1) {
+          exibirResultado();
+        } else {
+          indicePerguntaAtual++;
+          exibirPergunta();
+        }
+      }
+
+      function perguntaAnterior() {
+        if (indicePerguntaAtual > 0) {
+          indicePerguntaAtual--;
+          exibirPergunta();
+        }
+      }
+
+      function exibirResultado() {
+        var areaPerguntas = document.getElementById("questionArea");
+        areaPerguntas.style.display = "none";
+
+        var areaResultado = document.getElementById("resultArea");
+        areaResultado.style.display = "flex";
+        areaResultado.className = "result-container fade-in";
+
+        var contagem = [0, 0, 0, 0, 0, 0, 0];
+
+        for (var i = 0; i < respostasUsuario.length; i++) {
+          var valor = respostasUsuario[i];
+          if (valor >= 1 && valor <= 6) {
+            contagem[valor] = contagem[valor] + 1;
+          }
+        }
+
+        var maisEscolhido = 1;
+        var maiorNumero = contagem[1];
+
+        for (var i = 2; i <= 6; i++) {
+          if (contagem[i] > maiorNumero) {
+            maiorNumero = contagem[i];
+            maisEscolhido = i;
+          }
+        }
+
+        sessionStorage.setItem("MAIS_ESCOLHIDO", maisEscolhido);
+        console.log(
+          "Mais escolhido: ",
+          sessionStorage.getItem("MAIS_ESCOLHIDO")
+        );
+
+        buscarEstilo();
+        salvarResultado();
+      }
+
+      function salvarResultado() {
+        var usuarioId = sessionStorage.getItem("ID_USUARIO");
+        var maisEscolhido = sessionStorage.getItem("MAIS_ESCOLHIDO");
+
+        console.log("Usuario ID: ", usuarioId);
+        console.log("Mais escolhido (ID estilo): ", maisEscolhido);
+
+        fetch("/quiz/cadastrar-resultado", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuarioIdServer: usuarioId,
+            estiloIdServer: maisEscolhido,
+          }),
+        })
+          .then(function (resposta) {
+            if (resposta.ok) {
+              console.log("Resultado salvo com sucesso");
+            } else {
+              console.log("Houve um erro ao tentar salvar resultado!");
+              window.location.href = "./index.html";
+            }
+          })
+          .catch(function (erro) {
+            console.log(erro);
+          });
+      }
+
+      function buscarEstilo() {
+        var maisEscolhido = sessionStorage.getItem("MAIS_ESCOLHIDO");
+
+        console.log("Buscando estilo com id:", maisEscolhido);
+
+        fetch("/estilos/buscar-estilo/" + maisEscolhido, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(function (resposta) {
+            if (resposta.ok) {
+              resposta.json().then(function (json) {
+                console.log("JSON do estilo:", json);
+                mostrarResultado(json);
+              });
+            } else if (resposta.status === 204) {
+              console.log("Nenhum estilo encontrado para esse id");
+            } else {
+              console.log("Houve um erro ao tentar buscar resultado!");
+            }
+          })
+          .catch(function (erro) {
+            console.log(erro);
+          });
+      }
+
+      function mostrarResultado(json) {
+        var estilo = Array.isArray(json) ? json[0] : json;
+
+        if (!estilo) {
+          console.error("Nenhum estilo válido encontrado na resposta:", json);
+          return;
+        }
+
+        console.log("Estilo usado na tela:", estilo);
+
+        document.getElementById("nomeEstilo").textContent = estilo.nomeEstilo;
+        document.getElementById("descricaoEstilo").textContent =
+          estilo.descricao;
+        document.getElementById("paletaEstilo").textContent = estilo.paleta;
+        document.getElementById("modelagensEstilo").textContent =
+          estilo.modelagens;
+        document.getElementById("elevacaoEstilo").textContent = estilo.elevacao;
+        document.getElementById("exemploEstilo").textContent =
+          estilo.exemplo_look;
+        document.getElementById("maquiagemEstilo").textContent =
+          estilo.maquiagem;
+        document.getElementById("motivacaoEstilo").textContent =
+          estilo.motivacao;
+        document.getElementById("imageResultado").src =
+          "./assets/imgs/" + estilo.imagem;
+      }
+
+      console.log("Usuario ID: ", sessionStorage.ID_USUARIO);
+      window.addEventListener("DOMContentLoaded", iniciarQuiz);
+    </script>
+  </body>
+</html>

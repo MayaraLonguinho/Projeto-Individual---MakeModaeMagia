@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HOME</title>
+    <link rel="stylesheet" href="./css/resultado_quiz.css" />
+    <script src="./js/sessao.js"></script>
+  </head>
+
+  <body>
+    <aside class="sidebar">
+      <div class="logo-section">
+        <img src="./assets/imgs/logo1.png" alt="Logo" />
+      </div>
+
+      <nav class="menu">
+        <a href="./resultado_quiz.html" class="menu-item active">ESTILO</a>
+        <a href="./dashboard.html" class="menu-item">DASHBOARD</a>
+        <a href="./gameMemory.html" class="menu-item">GAME</a>
+        <button onclick="limparSessao()" class="button">SAIR</button>
+      </nav>
+    </aside>
+
+    <main class="game-container">
+      <div id="resultArea" class="result-container">
+        <div class="content-wrapper">
+          <h1 class="title">
+            Seu Estilo é:
+            <span class="highlight" id="nomeEstilo"> </span>
+          </h1>
+
+          <p class="description" id="descricaoEstilo"></p>
+
+          <div class="section">
+            <h2 class="section-title">Paleta:</h2>
+            <p class="section-text" id="paletaEstilo"></p>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">Modelagens-chave:</h2>
+            <p class="section-text" id="modelagensEstilo"></p>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">Como elevar à elegância:</h2>
+            <p class="section-text" id="elevacaoEstilo"></p>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">Make:</h2>
+            <p class="section-text" id="maquiagemEstilo"></p>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">Looks exemplo:</h2>
+            <p class="section-text" id="exemploEstilo"></p>
+          </div>
+
+          <p class="footer-text" id="motivacaoEstilo"></p>
+        </div>
+
+        <div class="result-image">
+          <img src="" id="imageResultado" />
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+
+<script>
+  console.log("SessionStorage na quiz:", sessionStorage);
+  if (!sessionStorage.ID_USUARIO) {
+    window.location = "./login.html";
+  } else {
+    console.log("ID na sessão:", sessionStorage.ID_USUARIO);
+  }
+
+  buscarResultado();
+
+  function buscarResultado() {
+    var idusuario = sessionStorage.ID_USUARIO;
+
+    fetch("/quiz/buscar-resultado/" + idusuario, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then(function (resposta) {
+        console.log("ESTOU NO THEN DO buscarResultado()!");
+        console.log(resposta);
+        if (resposta.status === 204) {
+          console.log("Nenhum resultado encontrado");
+        } else if (resposta.status === 200) {
+          resposta.json().then((json) => {
+            console.log(json);
+            resultado = json[0];
+            sessionStorage.setItem("FK_ESTILO", resultado.fkEstilo);
+            buscarEstilo();
+          });
+        } else {
+          console.log("Houve um erro ao tentar buscar resultado!");
+        }
+      })
+      .catch(function (erro) {
+        console.log(erro);
+      });
+  }
+
+  function buscarEstilo() {
+    var idEstilo = sessionStorage.FK_ESTILO;
+
+    console.log("Buscando estilo com id:", idEstilo);
+
+    fetch("/estilos/buscar-estilo/" + idEstilo, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then(function (resposta) {
+        if (resposta.ok) {
+          resposta.json().then(function (json) {
+            console.log("JSON do estilo:", json);
+            mostrarResultado(json[0]);
+          });
+        } else if (resposta.status === 204) {
+          console.log("Nenhum estilo encontrado para esse id");
+        } else {
+          console.log("Houve um erro ao tentar buscar resultado!");
+        }
+      })
+      .catch(function (erro) {
+        console.log(erro);
+      });
+  }
+
+  function mostrarResultado(json) {
+    var nomeEstilo = json.nomeEstilo;
+    var descricaoEstilo = json.descricao;
+    var paletaEstilo = json.paleta;
+    var modelagensEstilo = json.modelagens;
+    var elevacaoEstilo = json.elevacao;
+    var maquiagemEstilo = json.maquiagem;
+    var exemploEstilo = json.exemplo_look;
+    var motivacaoEstilo = json.motivacao;
+    var imageResultado = json.imagem;
+
+    document.getElementById("nomeEstilo").textContent = nomeEstilo;
+    document.getElementById("descricaoEstilo").textContent = descricaoEstilo;
+    document.getElementById("paletaEstilo").textContent = paletaEstilo;
+    document.getElementById("modelagensEstilo").textContent = modelagensEstilo;
+    document.getElementById("elevacaoEstilo").textContent = elevacaoEstilo;
+    document.getElementById("maquiagemEstilo").textContent = maquiagemEstilo;
+    document.getElementById("exemploEstilo").textContent = exemploEstilo;
+    document.getElementById("motivacaoEstilo").textContent = motivacaoEstilo;
+    document.getElementById("imageResultado").src =
+      "./assets/imgs/" + imageResultado;
+  }
+
+  function limparSessao() {
+    window.location = "./index.html";
+  }
+</script>

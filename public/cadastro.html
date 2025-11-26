@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CADASTRO</title>
+    <link rel="stylesheet" href="./css/cadastro.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <div class="banner-container">
+        <a href="./index.html" class="link_voltar">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Voltar
+        </a>
+      </div>
+
+      <div class="cadastro-container">
+        <h1>Cadastre-se</h1>
+
+        <div class="inputs-container">
+          <div class="dupla-input">
+            <label>
+              <br />
+
+              <div>
+                <input
+                  type="text"
+                  placeholder="Nome"
+                  id="input_nome"
+                  oninput="validarNome()"
+                />
+                <span id="nome_span"></span>
+              </div>
+            </label>
+          </div>
+
+          <label>
+            <br />
+
+            <div>
+              <input
+                type="email"
+                placeholder="Email"
+                id="input_email"
+                oninput="validarEmail()"
+              />
+              <span id="email_span"></span>
+            </div>
+          </label>
+
+          <div class="dupla-input">
+            <label>
+              <br />
+
+              <div>
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  id="input_senha"
+                  oninput="validarSenha()"
+                />
+                <span id="senha_span"></span>
+              </div>
+            </label>
+            <br />
+
+            <label>
+              <br />
+
+              <div>
+                <input
+                  type="password"
+                  placeholder="Confirme a senha"
+                  id="input_confSenha"
+                  oninput="validarSenhaRepetida()"
+                />
+                <span id="confirmar_senha_span"></span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button onclick="cadastrar()">CADASTRAR</button>
+        <br />
+        <br />
+        <br />
+        <div id="div_mensagem"></div>
+
+        <p>Já é cadastrado? <a href="./login.html">Acesse sua conta</a></p>
+      </div>
+
+      <div class="logo_image">
+        <img src="./assets/imgs/logo1.png" />
+      </div>
+    </main>
+  </body>
+</html>
+<script>
+  function cadastrar() {
+    //verifica se todos os dados estão sendo preenchidos
+
+    var nome = input_nome.value;
+    var email = input_email.value;
+    var senha = input_senha.value;
+    var confirmarSenha = input_confSenha.value;
+    var div_mensagem = document.getElementById("div_mensagem");
+
+    if (email == "" || nome == "" || senha == "" || confirmarSenha == "") {
+      alert("Preencha os dados corretamente!");
+    } else if (senha !== confirmarSenha) {
+      alert("As senhas precisam ser iguais!");
+    } else {
+      div_mensagem.innerHTML = `Cadastro realizado com sucesso. <br> 
+      Você será direcionado a tela de login!`;
+
+      fetch("/usuarios/cadastrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nomeServer: nome,
+          emailServer: email,
+          senhaServer: senha,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
+      window.location.href = "login.html"; //se estiver tudo okay, redireciona o usuario para a tela tela de login.
+    }
+  }
+
+  function validarNome() {
+    //validação do nome
+    var nome = input_nome.value;
+    var contador = 0;
+
+    while (contador < nome.length) {
+      if (nome.length <= 1) {
+        input_nome.style.border = "solid 2px red";
+        nome_span.innerHTML = "Insira um nome válido";
+      } else {
+        input_nome.style.border = "solid 2px #28DF99";
+        nome_span.innerHTML = "";
+      }
+
+      contador++;
+    }
+  }
+
+  function validarEmail() {
+    //validação do email
+    var email = input_email.value;
+    var contador = 0;
+
+    if (
+      email.endsWith("sptech.school") ||
+      email.endsWith(".com") ||
+      email.endsWith(".com.br")
+    ) {
+      while (contador < email.length) {
+        contador++;
+
+        if (email[contador] == "@") {
+          //percorre cada caractere do email do usuário para verificar se existe o caractere "@"
+          input_email.style.border = "solid 2px #28DF99";
+          email_span.innerHTML = "";
+        }
+      }
+    } else {
+      input_email.style.border = "solid 2px red";
+      email_span.innerHTML = "Formato de email inválido";
+    }
+  }
+
+  function validarSenha() {
+    //validação da senha inserida
+    var senha = input_senha.value;
+
+    if (senha.length < 8) {
+      senha_span.innerHTML = "Senha necessita de, no mínimo, 8 caracteres";
+      input_senha.style.border = "solid 2px red";
+    } else {
+      senha_span.innerHTML = "";
+      input_senha.style.border = "solid 2px #28DF99";
+    }
+  }
+
+  function validarSenhaRepetida() {
+    //valida a confirmação de senha
+    var senha = input_senha.value;
+    var confirmarSenha = input_confSenha.value;
+
+    if (confirmarSenha !== senha || confirmarSenha.length < 8) {
+      confirmar_senha_span.innerHTML = "As senhas precisam ser iguais";
+      input_confSenha.style.border = "solid 2px red";
+    } else {
+      confirmar_senha_span.innerHTML = "";
+      input_confSenha.style.border = "solid 2px #28DF99";
+    }
+  }
+</script>
