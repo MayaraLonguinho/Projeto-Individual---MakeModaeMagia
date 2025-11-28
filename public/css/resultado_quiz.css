@@ -134,6 +134,10 @@ body {
   margin-bottom: 30px;
 }
 
+.imageResultado {
+  max-width: 250px;
+}
+
 .footer-text {
   font-size: 16px;
   color: #a68a4d;

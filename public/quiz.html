@@ -336,6 +336,7 @@
           .then(function (resposta) {
             if (resposta.ok) {
               console.log("Resultado salvo com sucesso");
+              window.location.href = "resultado_quiz.html";
             } else {
               console.log("Houve um erro ao tentar salvar resultado!");
               window.location.href = "./index.html";
